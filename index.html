@@ -6,6 +6,7 @@
 <title>Pattosystem — ランチャー</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --bg: #0b0e14;
@@ -25,18 +26,12 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Outfit', 'Noto Sans JP', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow-x: hidden;
-  padding: 48px 24px 64px;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; overflow-x: hidden; padding: 48px 24px 64px;
 }
 body::before {
-  content: '';
-  position: fixed; inset: 0;
+  content: ''; position: fixed; inset: 0;
   background:
     radial-gradient(ellipse 60% 40% at 15% 15%, rgba(240,165,0,0.05) 0%, transparent 60%),
     radial-gradient(ellipse 50% 50% at 85% 80%, rgba(59,130,246,0.05) 0%, transparent 60%),
@@ -44,52 +39,32 @@ body::before {
   pointer-events: none; z-index: 0;
 }
 body::after {
-  content: '';
-  position: fixed; inset: 0;
+  content: ''; position: fixed; inset: 0;
   background-image:
     linear-gradient(rgba(255,255,255,0.013) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.013) 1px, transparent 1px);
-  background-size: 48px 48px;
-  pointer-events: none; z-index: 0;
+  background-size: 48px 48px; pointer-events: none; z-index: 0;
 }
-.wrapper {
-  position: relative; z-index: 1;
-  width: 100%; max-width: 900px;
-}
+.wrapper { position: relative; z-index: 1; width: 100%; max-width: 900px; }
 
 /* Header */
-.header {
-  text-align: center; margin-bottom: 44px;
-  animation: fadeUp 0.6s ease both;
-}
-.logo-mark {
-  display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px;
-}
+.header { text-align: center; margin-bottom: 44px; animation: fadeUp 0.6s ease both; }
+.logo-mark { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .logo-icon {
   width: 36px; height: 36px;
   background: linear-gradient(135deg, var(--accent1), #c87e00);
-  border-radius: 9px;
-  display: flex; align-items: center; justify-content: center;
+  border-radius: 9px; display: flex; align-items: center; justify-content: center;
   font-size: 18px; box-shadow: 0 0 18px rgba(240,165,0,0.25);
 }
-.logo-text {
-  font-size: 15px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
-}
-.header h1 {
-  font-size: clamp(22px, 4vw, 34px);
-  font-weight: 600; letter-spacing: -0.02em; margin-bottom: 6px;
-}
+.logo-text { font-size: 15px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.header h1 { font-size: clamp(22px, 4vw, 34px); font-weight: 600; letter-spacing: -0.02em; margin-bottom: 6px; }
 .header p { font-size: 13px; color: var(--text-sub); font-weight: 300; }
 
 /* Password Card */
 .pw-card {
-  background: var(--surface);
-  border: 1px solid rgba(167,139,250,0.18);
-  border-radius: 18px;
-  margin-bottom: 14px;
-  overflow: hidden;
-  animation: fadeUp 0.6s 0.08s ease both;
-  transition: box-shadow 0.3s;
+  background: var(--surface); border: 1px solid rgba(167,139,250,0.18);
+  border-radius: 18px; margin-bottom: 14px; overflow: hidden;
+  animation: fadeUp 0.6s 0.08s ease both; transition: box-shadow 0.3s;
 }
 .pw-card:hover { box-shadow: 0 8px 40px rgba(167,139,250,0.1); }
 .pw-header {
@@ -103,15 +78,15 @@ body::after {
 }
 .pw-title { font-size: 15px; font-weight: 600; flex: 1; }
 .pw-badge {
-  font-size: 10px; background: rgba(167,139,250,0.12);
-  color: var(--accent5); padding: 3px 9px; border-radius: 20px;
-  font-weight: 500; letter-spacing: 0.05em;
+  font-size: 10px; background: rgba(167,139,250,0.12); color: var(--accent5);
+  padding: 3px 9px; border-radius: 20px; font-weight: 500; letter-spacing: 0.05em;
 }
 .pw-chevron { color: var(--text-hint); font-size: 13px; transition: transform 0.3s; }
 .pw-card.open .pw-chevron { transform: rotate(180deg); }
 .pw-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
 .pw-card.open .pw-body { max-height: 900px; }
 
+/* Lock screen */
 .pw-lock {
   padding: 24px; border-top: 1px solid var(--border);
   display: flex; flex-direction: column; align-items: center; gap: 10px;
@@ -121,8 +96,7 @@ body::after {
 .pw-input {
   flex: 1; background: var(--surface2); border: 1px solid var(--border2);
   border-radius: 9px; padding: 9px 13px; font-size: 13px;
-  color: var(--text); font-family: inherit; outline: none;
-  transition: border-color 0.2s;
+  color: var(--text); font-family: inherit; outline: none; transition: border-color 0.2s;
 }
 .pw-input:focus { border-color: var(--accent5); }
 .pw-btn {
@@ -133,17 +107,20 @@ body::after {
 .pw-btn:hover { opacity: 0.85; }
 .pw-error { font-size: 12px; color: #f87171; display: none; }
 
+/* Credential list */
 .pw-list { padding: 14px 22px 18px; border-top: 1px solid var(--border); display: none; }
-.pw-list-header {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
-}
+.pw-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .pw-list-title { font-size: 12px; color: var(--text-sub); font-weight: 500; }
+.pw-list-actions { display: flex; gap: 8px; align-items: center; }
 .pw-add-btn {
   font-size: 11px; background: var(--surface2); border: 1px solid var(--border2);
   color: var(--text-sub); border-radius: 7px; padding: 4px 11px;
   cursor: pointer; font-family: inherit; transition: color 0.2s, border-color 0.2s;
 }
 .pw-add-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+.sync-status { font-size: 10px; color: var(--text-hint); display: flex; align-items: center; gap: 4px; }
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent3); }
+.sync-dot.syncing { background: var(--accent1); animation: pulse 1s infinite; }
 
 .cred-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .cred-table th {
@@ -183,9 +160,7 @@ body::after {
 .form-save:hover { opacity: 0.85; }
 
 /* Grid */
-.grid {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
-}
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
 
 /* Cards */
@@ -219,22 +194,18 @@ body::after {
 .card[data-accent="2"]:hover { box-shadow: 0 10px 36px rgba(59,130,246,0.12); }
 .card[data-accent="3"]:hover { box-shadow: 0 10px 36px rgba(16,185,129,0.12); }
 .card[data-accent="4"]:hover { box-shadow: 0 10px 36px rgba(224,90,138,0.12); }
-
 .card-glow {
-  position: absolute; top: -60px; right: -60px;
-  width: 180px; height: 180px; border-radius: 50%;
-  background: var(--ca); opacity: 0; filter: blur(60px);
+  position: absolute; top: -60px; right: -60px; width: 180px; height: 180px;
+  border-radius: 50%; background: var(--ca); opacity: 0; filter: blur(60px);
   transition: opacity 0.4s; pointer-events: none;
 }
 .card:hover .card-glow { opacity: 0.07; }
-
 .card-top { display: flex; align-items: center; gap: 12px; }
 .card-icon {
   width: 42px; height: 42px; border-radius: 10px;
   background: var(--surface2); border: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center;
-  font-size: 19px; flex-shrink: 0;
-  transition: background 0.25s, border-color 0.25s;
+  font-size: 19px; flex-shrink: 0; transition: background 0.25s, border-color 0.25s;
 }
 .card:hover .card-icon {
   background: color-mix(in srgb, var(--ca) 10%, var(--surface2));
@@ -243,51 +214,42 @@ body::after {
 .card-info { flex: 1; }
 .card-title { font-size: 14px; font-weight: 600; line-height: 1.3; margin-bottom: 2px; }
 .card-desc { font-size: 11px; color: var(--text-sub); font-weight: 300; }
-
 .link-btns { display: flex; flex-direction: column; gap: 6px; position: relative; z-index: 1; }
 .link-btn {
   display: flex; align-items: center; justify-content: space-between;
   background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 9px; padding: 8px 12px;
-  text-decoration: none; color: var(--text-sub);
-  font-size: 12px; font-weight: 400;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  border-radius: 9px; padding: 8px 12px; text-decoration: none; color: var(--text-sub);
+  font-size: 12px; font-weight: 400; transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 .link-btn:hover {
   background: color-mix(in srgb, var(--ca) 8%, var(--surface2));
-  border-color: color-mix(in srgb, var(--ca) 25%, transparent);
-  color: var(--text);
+  border-color: color-mix(in srgb, var(--ca) 25%, transparent); color: var(--text);
 }
-.link-btn.pending {
-  opacity: 0.4; cursor: default; pointer-events: none;
+.link-btn.pending { opacity: 0.4; cursor: default; pointer-events: none; }
+.link-btn.solo {
+  background: color-mix(in srgb, var(--ca) 8%, var(--surface2));
+  border-color: color-mix(in srgb, var(--ca) 20%, transparent); color: var(--text);
 }
 .link-btn-label { display: flex; align-items: center; gap: 7px; }
-.tag {
-  font-size: 9px; padding: 2px 7px; border-radius: 5px;
-  font-weight: 500; letter-spacing: 0.04em;
-}
+.tag { font-size: 9px; padding: 2px 7px; border-radius: 5px; font-weight: 500; letter-spacing: 0.04em; }
 .tag.customer { background: rgba(255,255,255,0.07); color: var(--text-sub); }
 .tag.admin    { background: rgba(240,165,0,0.1); color: #f0a500; }
 .tag.partner  { background: rgba(16,185,129,0.1); color: #10b981; }
 .tag.pending  { background: rgba(255,255,255,0.04); color: var(--text-hint); }
 .link-arrow { font-size: 11px; opacity: 0.35; transition: opacity 0.2s; }
 .link-btn:hover .link-arrow { opacity: 1; }
-.link-btn.solo {
-  background: color-mix(in srgb, var(--ca) 8%, var(--surface2));
-  border-color: color-mix(in srgb, var(--ca) 20%, transparent);
-  color: var(--text);
-}
 
-/* Footer */
 .footer {
-  margin-top: 40px; text-align: center;
-  color: var(--text-hint); font-size: 11px; letter-spacing: 0.05em;
-  animation: fadeUp 0.6s 0.5s ease both;
+  margin-top: 40px; text-align: center; color: var(--text-hint);
+  font-size: 11px; letter-spacing: 0.05em; animation: fadeUp 0.6s 0.5s ease both;
 }
 
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
 }
 </style>
 </head>
@@ -328,7 +290,13 @@ body::after {
       <div class="pw-list" id="pwList">
         <div class="pw-list-header">
           <span class="pw-list-title">保存済みアカウント</span>
-          <button class="pw-add-btn" onclick="toggleAddForm()">＋ 追加</button>
+          <div class="pw-list-actions">
+            <span class="sync-status">
+              <span class="sync-dot" id="syncDot"></span>
+              <span id="syncLabel">Supabase 同期済み</span>
+            </span>
+            <button class="pw-add-btn" onclick="toggleAddForm()">＋ 追加</button>
+          </div>
         </div>
         <table class="cred-table">
           <thead><tr>
@@ -336,7 +304,7 @@ body::after {
           </tr></thead>
           <tbody id="credBody"></tbody>
         </table>
-        <div class="no-creds" id="noCredsMsg">まだ登録がありません</div>
+        <div class="no-creds" id="noCredsMsg" style="display:none">まだ登録がありません</div>
         <div class="add-form" id="addForm">
           <div class="form-row">
             <div class="form-field">
@@ -362,7 +330,7 @@ body::after {
           </div>
         </div>
         <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-          <span style="font-size:10px;color:var(--text-hint)">※ データはブラウザのローカルストレージに保存されます</span>
+          <span style="font-size:10px;color:var(--text-hint)">※ データはSupabaseに保存・どのPCからも共有</span>
           <button class="pw-add-btn" onclick="lock()">🔒 ロック</button>
         </div>
       </div>
@@ -372,7 +340,7 @@ body::after {
   <!-- System Cards -->
   <div class="grid">
 
-    <!-- ② Patto -->
+    <!-- Patto -->
     <div class="card" data-accent="1">
       <div class="card-glow"></div>
       <div class="card-top">
@@ -384,17 +352,17 @@ body::after {
       </div>
       <div class="link-btns">
         <a class="link-btn" href="https://pattosystem.github.io/Patto-system/" target="_blank">
-          <span class="link-btn-label"><span class="tag customer">顧客用</span>顧客サイト (index.html)</span>
+          <span class="link-btn-label"><span class="tag customer">顧客用</span>顧客サイト</span>
           <span class="link-arrow">↗</span>
         </a>
         <a class="link-btn" href="https://pattosystem.github.io/Patto-system/admin.html" target="_blank">
-          <span class="link-btn-label"><span class="tag admin">管理</span>管理画面 (admin.html)</span>
+          <span class="link-btn-label"><span class="tag admin">管理</span>管理画面</span>
           <span class="link-arrow">↗</span>
         </a>
       </div>
     </div>
 
-    <!-- ③ 輸出入管理 -->
+    <!-- 輸出入管理 -->
     <div class="card" data-accent="2">
       <div class="card-glow"></div>
       <div class="card-top">
@@ -412,7 +380,7 @@ body::after {
       </div>
     </div>
 
-    <!-- ④ 注文納期確認 -->
+    <!-- 注文納期確認 -->
     <div class="card" data-accent="3">
       <div class="card-glow"></div>
       <div class="card-top">
@@ -424,17 +392,17 @@ body::after {
       </div>
       <div class="link-btns">
         <a class="link-btn" href="https://pattosystem.github.io/-/customer.html" target="_blank">
-          <span class="link-btn-label"><span class="tag customer">顧客用</span>顧客サイト (customer.html)</span>
+          <span class="link-btn-label"><span class="tag customer">顧客用</span>顧客サイト</span>
           <span class="link-arrow">↗</span>
         </a>
         <a class="link-btn" href="https://pattosystem.github.io/-/admin.html" target="_blank">
-          <span class="link-btn-label"><span class="tag admin">管理</span>管理画面 (admin.html)</span>
+          <span class="link-btn-label"><span class="tag admin">管理</span>管理画面</span>
           <span class="link-arrow">↗</span>
         </a>
       </div>
     </div>
 
-    <!-- ⑤ ベンスメディカルアカデミー -->
+    <!-- ベンスメディカルアカデミー -->
     <div class="card" data-accent="4">
       <div class="card-glow"></div>
       <div class="card-top">
@@ -446,7 +414,7 @@ body::after {
       </div>
       <div class="link-btns">
         <a class="link-btn" href="https://pattosystem.github.io/vands-lias-medical-academy/" target="_blank">
-          <span class="link-btn-label"><span class="tag customer">顧客用</span>顧客サイト (index.html)</span>
+          <span class="link-btn-label"><span class="tag customer">顧客用</span>顧客サイト</span>
           <span class="link-arrow">↗</span>
         </a>
         <a class="link-btn pending" href="#" target="_blank">
@@ -466,8 +434,13 @@ body::after {
 </div>
 
 <script>
+// ── Supabase setup ──
+const SUPABASE_URL = 'https://aeacglgdhskyaachsmdx.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlYWNnbGdkaHNreWFhY2hzbWR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMDczMjAsImV4cCI6MjA5MDU4MzMyMH0.zmcTXwXV33EdpjVxZHfyej-ys4F228FBrZDo5sg9idQ';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── Master password (localStorage only) ──
 const MASTER_KEY = 'ps_master_v1';
-const CREDS_KEY  = 'ps_creds_v1';
 
 function togglePwCard() {
   document.getElementById('pwCard').classList.toggle('open');
@@ -497,8 +470,7 @@ function lock() {
   const card = document.getElementById('pwCard');
   card.classList.remove('open');
   const badge = document.getElementById('pwBadge');
-  badge.textContent = 'LOCKED';
-  badge.style.background = ''; badge.style.color = '';
+  badge.textContent = 'LOCKED'; badge.style.background = ''; badge.style.color = '';
 }
 
 function showCredList() {
@@ -508,7 +480,7 @@ function showCredList() {
   badge.textContent = 'UNLOCKED';
   badge.style.background = 'rgba(16,185,129,0.15)';
   badge.style.color = '#10b981';
-  renderCreds();
+  loadCreds();
 }
 
 function showError(msg) {
@@ -517,26 +489,39 @@ function showError(msg) {
   setTimeout(() => el.style.display = 'none', 2500);
 }
 
-function getCreds() {
-  try { return JSON.parse(localStorage.getItem(CREDS_KEY)) || []; }
-  catch { return []; }
+function setSyncing(on) {
+  const dot = document.getElementById('syncDot');
+  const label = document.getElementById('syncLabel');
+  if (on) {
+    dot.classList.add('syncing');
+    label.textContent = '同期中...';
+  } else {
+    dot.classList.remove('syncing');
+    label.textContent = 'Supabase 同期済み';
+  }
 }
-function saveCreds(arr) { localStorage.setItem(CREDS_KEY, JSON.stringify(arr)); }
 
-function renderCreds() {
-  const creds = getCreds();
+async function loadCreds() {
+  setSyncing(true);
+  const { data, error } = await sb.from('credentials').select('*').order('created_at');
+  setSyncing(false);
+  if (error) { console.error(error); return; }
+  renderCreds(data || []);
+}
+
+function renderCreds(creds) {
   const tbody = document.getElementById('credBody');
   const noMsg = document.getElementById('noCredsMsg');
   tbody.innerHTML = '';
   noMsg.style.display = creds.length ? 'none' : 'block';
-  creds.forEach((c, i) => {
+  creds.forEach(c => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${esc(c.service)}</td>
-      <td>${esc(c.id)}</td>
-      <td><span class="cred-pw hidden" onclick="this.classList.toggle('hidden')">${esc(c.pw)}</span></td>
+      <td>${esc(c.login_id)}</td>
+      <td><span class="cred-pw hidden" onclick="this.classList.toggle('hidden')">${esc(c.password)}</span></td>
       <td style="color:var(--text-hint);font-size:11px">${esc(c.note)}</td>
-      <td><button class="del-btn" onclick="deleteCred(${i})">✕</button></td>
+      <td><button class="del-btn" onclick="deleteCred('${c.id}')">✕</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -550,24 +535,28 @@ function toggleAddForm() {
   document.getElementById('addForm').classList.toggle('visible');
 }
 
-function saveCred() {
-  const service = document.getElementById('fService').value.trim();
-  const id      = document.getElementById('fId').value.trim();
-  const pw      = document.getElementById('fPw').value.trim();
-  const note    = document.getElementById('fNote').value.trim();
-  if (!service || !id) { alert('サービス名とIDは必須です'); return; }
-  const creds = getCreds();
-  creds.push({ service, id, pw, note });
-  saveCreds(creds);
+async function saveCred() {
+  const service  = document.getElementById('fService').value.trim();
+  const login_id = document.getElementById('fId').value.trim();
+  const password = document.getElementById('fPw').value.trim();
+  const note     = document.getElementById('fNote').value.trim();
+  if (!service || !login_id) { alert('サービス名とIDは必須です'); return; }
+  setSyncing(true);
+  const { error } = await sb.from('credentials').insert([{ service, login_id, password, note }]);
+  setSyncing(false);
+  if (error) { alert('保存に失敗しました: ' + error.message); return; }
   ['fService','fId','fPw','fNote'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('addForm').classList.remove('visible');
-  renderCreds();
+  loadCreds();
 }
 
-function deleteCred(i) {
+async function deleteCred(id) {
   if (!confirm('削除しますか？')) return;
-  const creds = getCreds(); creds.splice(i, 1);
-  saveCreds(creds); renderCreds();
+  setSyncing(true);
+  const { error } = await sb.from('credentials').delete().eq('id', id);
+  setSyncing(false);
+  if (error) { alert('削除に失敗しました'); return; }
+  loadCreds();
 }
 </script>
 </body>
