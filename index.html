@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pattosystem — ランチャー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0e14;
+  --surface: #13171f;
+  --surface2: #1a1f2a;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0f2f5;
+  --text-sub: #7a8394;
+  --text-hint: #404755;
+  --accent1: #f0a500;
+  --accent2: #3b82f6;
+  --accent3: #10b981;
+  --accent4: #e05a8a;
+  --accent5: #a78bfa;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+  padding: 48px 24px 64px;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 15%, rgba(240,165,0,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 85% 80%, rgba(59,130,246,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 60% 5%, rgba(167,139,250,0.04) 0%, transparent 50%);
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.013) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.013) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none; z-index: 0;
+}
+.wrapper {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 900px;
+}
+
+/* Header */
+.header {
+  text-align: center; margin-bottom: 44px;
+  animation: fadeUp 0.6s ease both;
+}
+.logo-mark {
+  display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px;
+}
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent1), #c87e00);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; box-shadow: 0 0 18px rgba(240,165,0,0.25);
+}
+.logo-text {
+  font-size: 15px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.header h1 {
+  font-size: clamp(22px, 4vw, 34px);
+  font-weight: 600; letter-spacing: -0.02em; margin-bottom: 6px;
+}
+.header p { font-size: 13px; color: var(--text-sub); font-weight: 300; }
+
+/* Password Card */
+.pw-card {
+  background: var(--surface);
+  border: 1px solid rgba(167,139,250,0.18);
+  border-radius: 18px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  animation: fadeUp 0.6s 0.08s ease both;
+  transition: box-shadow 0.3s;
+}
+.pw-card:hover { box-shadow: 0 8px 40px rgba(167,139,250,0.1); }
+.pw-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 22px; cursor: pointer; user-select: none;
+}
+.pw-icon {
+  width: 42px; height: 42px; border-radius: 10px;
+  background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.2);
+  display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0;
+}
+.pw-title { font-size: 15px; font-weight: 600; flex: 1; }
+.pw-badge {
+  font-size: 10px; background: rgba(167,139,250,0.12);
+  color: var(--accent5); padding: 3px 9px; border-radius: 20px;
+  font-weight: 500; letter-spacing: 0.05em;
+}
+.pw-chevron { color: var(--text-hint); font-size: 13px; transition: transform 0.3s; }
+.pw-card.open .pw-chevron { transform: rotate(180deg); }
+.pw-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+.pw-card.open .pw-body { max-height: 900px; }
+
+.pw-lock {
+  padding: 24px; border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.pw-lock p { font-size: 13px; color: var(--text-sub); }
+.pw-input-row { display: flex; gap: 8px; width: 100%; max-width: 320px; }
+.pw-input {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 9px; padding: 9px 13px; font-size: 13px;
+  color: var(--text); font-family: inherit; outline: none;
+  transition: border-color 0.2s;
+}
+.pw-input:focus { border-color: var(--accent5); }
+.pw-btn {
+  background: var(--accent5); color: #fff; border: none;
+  border-radius: 9px; padding: 9px 16px; font-size: 13px;
+  font-family: inherit; font-weight: 500; cursor: pointer; transition: opacity 0.2s;
+}
+.pw-btn:hover { opacity: 0.85; }
+.pw-error { font-size: 12px; color: #f87171; display: none; }
+
+.pw-list { padding: 14px 22px 18px; border-top: 1px solid var(--border); display: none; }
+.pw-list-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+}
+.pw-list-title { font-size: 12px; color: var(--text-sub); font-weight: 500; }
+.pw-add-btn {
+  font-size: 11px; background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text-sub); border-radius: 7px; padding: 4px 11px;
+  cursor: pointer; font-family: inherit; transition: color 0.2s, border-color 0.2s;
+}
+.pw-add-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+.cred-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.cred-table th {
+  text-align: left; color: var(--text-hint); font-weight: 400;
+  padding: 5px 8px; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+.cred-table td {
+  padding: 9px 8px; color: var(--text-sub);
+  border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle;
+}
+.cred-table td:first-child { color: var(--text); font-weight: 500; }
+.cred-pw { font-family: monospace; cursor: pointer; transition: filter 0.2s; }
+.cred-pw.hidden { filter: blur(5px); }
+.cred-pw.hidden:hover { filter: blur(2px); }
+.del-btn {
+  background: none; border: none; color: var(--text-hint);
+  cursor: pointer; font-size: 13px; padding: 2px 5px; transition: color 0.2s;
+}
+.del-btn:hover { color: #f87171; }
+.no-creds { text-align: center; color: var(--text-hint); font-size: 13px; padding: 18px; }
+
+.add-form {
+  display: none; flex-direction: column; gap: 8px;
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+}
+.add-form.visible { display: flex; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+@media(max-width: 600px) { .form-row { grid-template-columns: 1fr 1fr; } }
+.form-field { display: flex; flex-direction: column; gap: 3px; }
+.form-label { font-size: 10px; color: var(--text-hint); letter-spacing: 0.05em; text-transform: uppercase; }
+.form-save {
+  background: var(--accent5); color: #fff; border: none; border-radius: 9px;
+  padding: 9px 16px; font-size: 13px; font-family: inherit; font-weight: 500;
+  cursor: pointer; align-self: flex-end;
+}
+.form-save:hover { opacity: 0.85; }
+
+/* Grid */
+.grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+}
+@media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+
+/* Cards */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 18px; padding: 20px 20px 18px;
+  display: flex; flex-direction: column; gap: 14px;
+  overflow: hidden; position: relative;
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+  animation: fadeUp 0.6s ease both;
+}
+.card:nth-child(1) { animation-delay: 0.16s; }
+.card:nth-child(2) { animation-delay: 0.22s; }
+.card:nth-child(3) { animation-delay: 0.28s; }
+.card:nth-child(4) { animation-delay: 0.34s; }
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 2px; border-radius: 18px 18px 0 0; opacity: 0; transition: opacity 0.25s;
+}
+.card:hover { transform: translateY(-3px); border-color: var(--border2); }
+.card:hover::before { opacity: 1; }
+.card[data-accent="1"] { --ca: var(--accent1); }
+.card[data-accent="2"] { --ca: var(--accent2); }
+.card[data-accent="3"] { --ca: var(--accent3); }
+.card[data-accent="4"] { --ca: var(--accent4); }
+.card[data-accent="1"]::before { background: var(--accent1); }
+.card[data-accent="2"]::before { background: var(--accent2); }
+.card[data-accent="3"]::before { background: var(--accent3); }
+.card[data-accent="4"]::before { background: var(--accent4); }
+.card[data-accent="1"]:hover { box-shadow: 0 10px 36px rgba(240,165,0,0.12); }
+.card[data-accent="2"]:hover { box-shadow: 0 10px 36px rgba(59,130,246,0.12); }
+.card[data-accent="3"]:hover { box-shadow: 0 10px 36px rgba(16,185,129,0.12); }
+.card[data-accent="4"]:hover { box-shadow: 0 10px 36px rgba(224,90,138,0.12); }
+
+.card-glow {
+  position: absolute; top: -60px; right: -60px;
+  width: 180px; height: 180px; border-radius: 50%;
+  background: var(--ca); opacity: 0; filter: blur(60px);
+  transition: opacity 0.4s; pointer-events: none;
+}
+.card:hover .card-glow { opacity: 0.07; }
+
+.card-top { display: flex; align-items: center; gap: 12px; }
+.card-icon {
+  width: 42px; height: 42px; border-radius: 10px;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px; flex-shrink: 0;
+  transition: background 0.25s, border-color 0.25s;
+}
+.card:hover .card-icon {
+  background: color-mix(in srgb, var(--ca) 10%, var(--surface2));
+  border-color: color-mix(in srgb, var(--ca) 25%, transparent);
+}
+.card-info { flex: 1; }
+.card-title { font-size: 14px; font-weight: 600; line-height: 1.3; margin-bottom: 2px; }
+.card-desc { font-size: 11px; color: var(--text-sub); font-weight: 300; }
+
+.link-btns { display: flex; flex-direction: column; gap: 6px; position: relative; z-index: 1; }
+.link-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 9px; padding: 8px 12px;
+  text-decoration: none; color: var(--text-sub);
+  font-size: 12px; font-weight: 400;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.link-btn:hover {
+  background: color-mix(in srgb, var(--ca) 8%, var(--surface2));
+  border-color: color-mix(in srgb, var(--ca) 25%, transparent);
+  color: var(--text);
+}
+.link-btn.pending {
+  opacity: 0.4; cursor: default; pointer-events: none;
+}
+.link-btn-label { display: flex; align-items: center; gap: 7px; }
+.tag {
+  font-size: 9px; padding: 2px 7px; border-radius: 5px;
+  font-weight: 500; letter-spacing: 0.04em;
+}
+.tag.customer { background: rgba(255,255,255,0.07); color: var(--text-sub); }
+.tag.admin    { background: rgba(240,165,0,0.1); color: #f0a500; }
+.tag.partner  { background: rgba(16,185,129,0.1); color: #10b981; }
+.tag.pending  { background: rgba(255,255,255,0.04); color: var(--text-hint); }
+.link-arrow { font-size: 11px; opacity: 0.35; transition: opacity 0.2s; }
+.link-btn:hover .link-arrow { opacity: 1; }
+.link-btn.solo {
+  background: color-mix(in srgb, var(--ca) 8%, var(--surface2));
+  border-color: color-mix(in srgb, var(--ca) 20%, transparent);
+  color: var(--text);
+}
+
+/* Footer */
+.footer {
+  margin-top: 40px; text-align: center;
+  color: var(--text-hint); font-size: 11px; letter-spacing: 0.05em;
+  animation: fadeUp 0.6s 0.5s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-mark">
+      <div class="logo-icon">🅿</div>
+      <span class="logo-text">Pattosystem</span>
+    </div>
+    <h1>管理システム ランチャー</h1>
+    <p>業務システムへのクイックアクセス</p>
+  </div>
+
+  <!-- ① ID/Password管理 -->
+  <div class="pw-card" id="pwCard">
+    <div class="pw-header" onclick="togglePwCard()">
+      <div class="pw-icon">🔐</div>
+      <div class="pw-title">ID / Password 管理</div>
+      <span class="pw-badge" id="pwBadge">LOCKED</span>
+      <span class="pw-chevron">▼</span>
+    </div>
+    <div class="pw-body">
+      <!-- Lock screen -->
+      <div class="pw-lock" id="pwLock">
+        <p>マスターパスワードを入力してください</p>
+        <div class="pw-input-row">
+          <input type="password" class="pw-input" id="masterInput" placeholder="Master password"
+            onkeydown="if(event.key==='Enter')unlock()">
+          <button class="pw-btn" onclick="unlock()">解錠</button>
+        </div>
+        <span class="pw-error" id="pwError"></span>
+        <p style="font-size:10px;color:var(--text-hint);margin-top:2px">初回は任意のパスワードを設定できます（4文字以上）</p>
+      </div>
+      <!-- Credential list -->
+      <div class="pw-list" id="pwList">
+        <div class="pw-list-header">
+          <span class="pw-list-title">保存済みアカウント</span>
+          <button class="pw-add-btn" onclick="toggleAddForm()">＋ 追加</button>
+        </div>
+        <table class="cred-table">
+          <thead><tr>
+            <th>サービス</th><th>ID / メール</th><th>パスワード</th><th>メモ</th><th></th>
+          </tr></thead>
+          <tbody id="credBody"></tbody>
+        </table>
+        <div class="no-creds" id="noCredsMsg">まだ登録がありません</div>
+        <div class="add-form" id="addForm">
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">サービス名</label>
+              <input type="text" class="pw-input" id="fService" placeholder="Patto 管理画面">
+            </div>
+            <div class="form-field">
+              <label class="form-label">ID / メール</label>
+              <input type="text" class="pw-input" id="fId" placeholder="admin@example.com">
+            </div>
+            <div class="form-field">
+              <label class="form-label">パスワード</label>
+              <input type="text" class="pw-input" id="fPw" placeholder="••••••">
+            </div>
+            <div class="form-field">
+              <label class="form-label">メモ</label>
+              <input type="text" class="pw-input" id="fNote" placeholder="任意">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button class="pw-add-btn" onclick="toggleAddForm()">キャンセル</button>
+            <button class="form-save" onclick="saveCred()">保存</button>
+          </div>
+        </div>
+        <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:10px;color:var(--text-hint)">※ データはブラウザのローカルストレージに保存されます</span>
+          <button class="pw-add-btn" onclick="lock()">🔒 ロック</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Cards -->
+  <div class="grid">
+
+    <!-- ② Patto -->
+    <div class="card" data-accent="1">
+      <div class="card-glow"></div>
+      <div class="card-top">
+        <div class="card-icon">📦</div>
+        <div class="card-info">
+          <div class="card-title">Patto</div>
+          <div class="card-desc">クリニック在庫管理システム</div>
+        </div>
+      </div>
+      <div class="link-btns">
+        <a class="link-btn" href="https://pattosystem.github.io/Patto-system/" target="_blank">
+          <span class="link-btn-label"><span class="tag customer">顧客用</span>顧客サイト (index.html)</span>
+          <span class="link-arrow">↗</span>
+        </a>
+        <a class="link-btn" href="https://pattosystem.github.io/Patto-system/admin.html" target="_blank">
+          <span class="link-btn-label"><span class="tag admin">管理</span>管理画面 (admin.html)</span>
+          <span class="link-arrow">↗</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ③ 輸出入管理 -->
+    <div class="card" data-accent="2">
+      <div class="card-glow"></div>
+      <div class="card-top">
+        <div class="card-icon">🌐</div>
+        <div class="card-info">
+          <div class="card-title">輸出入管理</div>
+          <div class="card-desc">海外仕入れ・輸出入ステータス管理</div>
+        </div>
+      </div>
+      <div class="link-btns">
+        <a class="link-btn solo" href="https://pattosystem.github.io/order-management/order_management_system.html" target="_blank">
+          <span class="link-btn-label">システムを開く</span>
+          <span class="link-arrow">↗</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ④ 注文納期確認 -->
+    <div class="card" data-accent="3">
+      <div class="card-glow"></div>
+      <div class="card-top">
+        <div class="card-icon">📋</div>
+        <div class="card-info">
+          <div class="card-title">注文納期確認</div>
+          <div class="card-desc">注文ステータス・納期トラッキング</div>
+        </div>
+      </div>
+      <div class="link-btns">
+        <a class="link-btn" href="https://pattosystem.github.io/-/customer.html" target="_blank">
+          <span class="link-btn-label"><span class="tag customer">顧客用</span>顧客サイト (customer.html)</span>
+          <span class="link-arrow">↗</span>
+        </a>
+        <a class="link-btn" href="https://pattosystem.github.io/-/admin.html" target="_blank">
+          <span class="link-btn-label"><span class="tag admin">管理</span>管理画面 (admin.html)</span>
+          <span class="link-arrow">↗</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ⑤ ベンスメディカルアカデミー -->
+    <div class="card" data-accent="4">
+      <div class="card-glow"></div>
+      <div class="card-top">
+        <div class="card-icon">🎓</div>
+        <div class="card-info">
+          <div class="card-title">ベンスメディカル<br>アカデミー</div>
+          <div class="card-desc">医師向けトレーニングプラットフォーム</div>
+        </div>
+      </div>
+      <div class="link-btns">
+        <a class="link-btn" href="https://pattosystem.github.io/vands-lias-medical-academy/" target="_blank">
+          <span class="link-btn-label"><span class="tag customer">顧客用</span>顧客サイト (index.html)</span>
+          <span class="link-arrow">↗</span>
+        </a>
+        <a class="link-btn pending" href="#" target="_blank">
+          <span class="link-btn-label"><span class="tag pending">準備中</span>管理画面</span>
+          <span class="link-arrow">–</span>
+        </a>
+        <a class="link-btn pending" href="#" target="_blank">
+          <span class="link-btn-label"><span class="tag pending">準備中</span>パートナー用</span>
+          <span class="link-arrow">–</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">PATTOSYSTEM &nbsp;·&nbsp; Internal Tools &nbsp;·&nbsp; 2026</div>
+</div>
+
+<script>
+const MASTER_KEY = 'ps_master_v1';
+const CREDS_KEY  = 'ps_creds_v1';
+
+function togglePwCard() {
+  document.getElementById('pwCard').classList.toggle('open');
+}
+
+function unlock() {
+  const input = document.getElementById('masterInput').value;
+  const stored = localStorage.getItem(MASTER_KEY);
+  if (!stored) {
+    if (input.length < 4) { showError('4文字以上で設定してください'); return; }
+    localStorage.setItem(MASTER_KEY, btoa(encodeURIComponent(input)));
+    showCredList();
+  } else {
+    if (btoa(encodeURIComponent(input)) === stored) {
+      showCredList();
+    } else {
+      showError('パスワードが違います');
+    }
+  }
+}
+
+function lock() {
+  document.getElementById('pwLock').style.display = 'flex';
+  document.getElementById('pwList').style.display = 'none';
+  document.getElementById('masterInput').value = '';
+  document.getElementById('addForm').classList.remove('visible');
+  const card = document.getElementById('pwCard');
+  card.classList.remove('open');
+  const badge = document.getElementById('pwBadge');
+  badge.textContent = 'LOCKED';
+  badge.style.background = ''; badge.style.color = '';
+}
+
+function showCredList() {
+  document.getElementById('pwLock').style.display = 'none';
+  document.getElementById('pwList').style.display = 'block';
+  const badge = document.getElementById('pwBadge');
+  badge.textContent = 'UNLOCKED';
+  badge.style.background = 'rgba(16,185,129,0.15)';
+  badge.style.color = '#10b981';
+  renderCreds();
+}
+
+function showError(msg) {
+  const el = document.getElementById('pwError');
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 2500);
+}
+
+function getCreds() {
+  try { return JSON.parse(localStorage.getItem(CREDS_KEY)) || []; }
+  catch { return []; }
+}
+function saveCreds(arr) { localStorage.setItem(CREDS_KEY, JSON.stringify(arr)); }
+
+function renderCreds() {
+  const creds = getCreds();
+  const tbody = document.getElementById('credBody');
+  const noMsg = document.getElementById('noCredsMsg');
+  tbody.innerHTML = '';
+  noMsg.style.display = creds.length ? 'none' : 'block';
+  creds.forEach((c, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${esc(c.service)}</td>
+      <td>${esc(c.id)}</td>
+      <td><span class="cred-pw hidden" onclick="this.classList.toggle('hidden')">${esc(c.pw)}</span></td>
+      <td style="color:var(--text-hint);font-size:11px">${esc(c.note)}</td>
+      <td><button class="del-btn" onclick="deleteCred(${i})">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function toggleAddForm() {
+  document.getElementById('addForm').classList.toggle('visible');
+}
+
+function saveCred() {
+  const service = document.getElementById('fService').value.trim();
+  const id      = document.getElementById('fId').value.trim();
+  const pw      = document.getElementById('fPw').value.trim();
+  const note    = document.getElementById('fNote').value.trim();
+  if (!service || !id) { alert('サービス名とIDは必須です'); return; }
+  const creds = getCreds();
+  creds.push({ service, id, pw, note });
+  saveCreds(creds);
+  ['fService','fId','fPw','fNote'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('addForm').classList.remove('visible');
+  renderCreds();
+}
+
+function deleteCred(i) {
+  if (!confirm('削除しますか？')) return;
+  const creds = getCreds(); creds.splice(i, 1);
+  saveCreds(creds); renderCreds();
+}
+</script>
+</body>
+</html>
