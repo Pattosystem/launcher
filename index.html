@@ -267,6 +267,56 @@ body::after {
   font-size: 11px; letter-spacing: 0.05em; animation: fadeUp 0.6s 0.5s ease both;
 }
 
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: #13171f; border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px; width: 100%; max-width: 720px;
+  max-height: 85vh; display: flex; flex-direction: column;
+  transform: translateY(20px); transition: transform 0.25s; overflow: hidden;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 22px 24px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.modal-title { font-size: 16px; font-weight: 600; margin-bottom: 3px; }
+.modal-sub { font-size: 12px; color: var(--text-hint); }
+.modal-close {
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text-sub); border-radius: 8px; width: 32px; height: 32px;
+  cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;
+  transition: color 0.2s, border-color 0.2s; flex-shrink: 0;
+}
+.modal-close:hover { color: var(--text); border-color: var(--border2); }
+.modal-toolbar {
+  display: flex; gap: 10px; padding: 14px 24px;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.modal-search {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 9px; padding: 9px 14px; font-size: 13px;
+  color: var(--text); font-family: inherit; outline: none; transition: border-color 0.2s;
+}
+.modal-search:focus { border-color: var(--accent5); }
+.modal-add-btn {
+  background: var(--accent5); color: #fff; border: none;
+  border-radius: 9px; padding: 9px 16px; font-size: 13px;
+  font-family: inherit; font-weight: 500; cursor: pointer; white-space: nowrap; transition: opacity 0.2s;
+}
+.modal-add-btn:hover { opacity: 0.85; }
+.yakuji-form { display: none; padding: 14px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.yakuji-form.visible { display: block; }
+.yakuji-form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+@media(max-width: 560px) { .yakuji-form-row { grid-template-columns: 1fr; } }
+.modal-table-wrap { overflow-y: auto; flex: 1; padding: 0 24px 16px; }
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -488,6 +538,10 @@ body::after {
           <span class="link-btn-label"><span class="tag admin">薬事</span>薬事申請手続き</span>
           <span class="link-arrow">↗</span>
         </a>
+        <button class="link-btn" onclick="openYakuji()">
+          <span class="link-btn-label"><span class="tag partner">管理</span>クリニック ログイン管理（300件）</span>
+          <span class="link-arrow">☰</span>
+        </button>
         <a class="link-btn" href="https://mydhl.express.dhl/jp/ja/help-and-support.html#/contact_us" target="_blank">
           <span class="link-btn-label"><span class="tag customer">DHL</span>貨物書類 取り寄せ</span>
           <span class="link-arrow">↗</span>
@@ -517,6 +571,61 @@ body::after {
   </div>
 
   <div class="footer">LIAS Webマスター &nbsp;·&nbsp; Internal Tools &nbsp;·&nbsp; 2026</div>
+</div>
+
+<!-- Yakuji Modal -->
+<div class="modal-overlay" id="yakujiOverlay" onclick="closeYakuji(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">💊 薬事申請 クリニック管理</div>
+        <div class="modal-sub" id="yakujiCount">読み込み中...</div>
+      </div>
+      <button class="modal-close" onclick="closeYakujiBtn()">✕</button>
+    </div>
+
+    <!-- Search & Add -->
+    <div class="modal-toolbar">
+      <input type="text" class="modal-search" id="yakujiSearch" placeholder="🔍 クリニック名で検索..." oninput="filterYakuji()">
+      <button class="modal-add-btn" onclick="toggleYakujiForm()">＋ 追加</button>
+    </div>
+
+    <!-- Add Form -->
+    <div class="yakuji-form" id="yakujiForm">
+      <div class="yakuji-form-row">
+        <div class="form-field">
+          <label class="form-label">クリニック名</label>
+          <input type="text" class="pw-input" id="yClinic" placeholder="〇〇クリニック">
+        </div>
+        <div class="form-field">
+          <label class="form-label">ログインID</label>
+          <input type="text" class="pw-input" id="yId" placeholder="clinic_id">
+        </div>
+        <div class="form-field">
+          <label class="form-label">パスワード</label>
+          <input type="text" class="pw-input" id="yPw" placeholder="••••••">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+        <button class="pw-add-btn" onclick="toggleYakujiForm()">キャンセル</button>
+        <button class="form-save" onclick="saveYakuji()">保存</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="modal-table-wrap">
+      <table class="cred-table" style="font-size:13px">
+        <thead><tr>
+          <th style="width:35%">クリニック名</th>
+          <th style="width:28%">ログインID</th>
+          <th style="width:28%">パスワード</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="yakujiBody"></tbody>
+      </table>
+      <div class="no-creds" id="yakujiNoMsg" style="display:none">登録がありません</div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -643,6 +752,77 @@ async function deleteCred(id) {
   setSyncing(false);
   if (error) { alert('削除に失敗しました'); return; }
   loadCreds();
+}
+
+// ── Yakuji Clinic Manager ──
+let yakujiAll = [];
+
+function openYakuji() {
+  document.getElementById('yakujiOverlay').classList.add('open');
+  loadYakuji();
+}
+
+function closeYakujiBtn() {
+  document.getElementById('yakujiOverlay').classList.remove('open');
+}
+
+function closeYakuji(e) {
+  if (e.target === document.getElementById('yakujiOverlay')) closeYakujiBtn();
+}
+
+async function loadYakuji() {
+  document.getElementById('yakujiCount').textContent = '読み込み中...';
+  const { data, error } = await sb.from('yakuji_clinics').select('*').order('clinic_name');
+  if (error) { console.error(error); return; }
+  yakujiAll = data || [];
+  document.getElementById('yakujiCount').textContent = `全 ${yakujiAll.length} 件`;
+  renderYakuji(yakujiAll);
+}
+
+function filterYakuji() {
+  const q = document.getElementById('yakujiSearch').value.trim().toLowerCase();
+  const filtered = q ? yakujiAll.filter(c => c.clinic_name.toLowerCase().includes(q)) : yakujiAll;
+  renderYakuji(filtered);
+}
+
+function renderYakuji(list) {
+  const tbody = document.getElementById('yakujiBody');
+  const noMsg = document.getElementById('yakujiNoMsg');
+  tbody.innerHTML = '';
+  noMsg.style.display = list.length ? 'none' : 'block';
+  list.forEach(c => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${esc(c.clinic_name)}</td>
+      <td>${esc(c.login_id)}</td>
+      <td><span class="cred-pw hidden" onclick="this.classList.toggle('hidden')">${esc(c.password)}</span></td>
+      <td><button class="del-btn" onclick="deleteYakuji('${c.id}')">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function toggleYakujiForm() {
+  document.getElementById('yakujiForm').classList.toggle('visible');
+}
+
+async function saveYakuji() {
+  const clinic_name = document.getElementById('yClinic').value.trim();
+  const login_id    = document.getElementById('yId').value.trim();
+  const password    = document.getElementById('yPw').value.trim();
+  if (!clinic_name || !login_id) { alert('クリニック名とIDは必須です'); return; }
+  const { error } = await sb.from('yakuji_clinics').insert([{ clinic_name, login_id, password }]);
+  if (error) { alert('保存に失敗しました: ' + error.message); return; }
+  ['yClinic','yId','yPw'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('yakujiForm').classList.remove('visible');
+  loadYakuji();
+}
+
+async function deleteYakuji(id) {
+  if (!confirm('削除しますか？')) return;
+  const { error } = await sb.from('yakuji_clinics').delete().eq('id', id);
+  if (error) { alert('削除に失敗しました'); return; }
+  loadYakuji();
 }
 </script>
 </body>
