@@ -644,9 +644,46 @@ body::after {
       </div>
     </div>
 
+    <!-- 仕入れ管理 -->
+    <div class="card" data-accent="1" style="--ca: var(--accent1);">
+      <div class="card-glow"></div>
+      <div class="card-top">
+        <div class="card-icon">💴</div>
+        <div class="card-info">
+          <div class="card-title">仕入れ管理</div>
+          <div class="card-desc">価格・仕入れ管理システム</div>
+        </div>
+      </div>
+      <div class="link-btns">
+        <button class="link-btn solo" onclick="openPriceManager()">
+          <span class="link-btn-label">システムを開く</span>
+          <span class="link-arrow">↗</span>
+        </button>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Tool Links -->
+  <!-- Price Manager Password Modal -->
+  <div class="modal-overlay" id="priceOverlay" onclick="closePriceModal(event)">
+    <div class="modal" style="max-width:380px">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">💴 仕入れ管理</div>
+          <div class="modal-sub">パスワードを入力してください</div>
+        </div>
+        <button class="modal-close" onclick="closePriceModalBtn()">✕</button>
+      </div>
+      <div style="padding:24px;display:flex;flex-direction:column;gap:12px;align-items:center">
+        <input type="password" class="pw-input" id="priceInput" placeholder="パスワード"
+          style="width:100%;max-width:280px"
+          onkeydown="if(event.key==='Enter')checkPricePass()">
+        <span id="priceError" style="font-size:12px;color:#f87171;display:none">パスワードが違います</span>
+        <button class="pw-btn" onclick="checkPricePass()" style="width:100%;max-width:280px;padding:11px">開く</button>
+      </div>
+    </div>
+  </div>
+
   <div class="tool-links">
     <span class="tool-links-label">開発ツール</span>
     <div class="tool-links-row">
@@ -872,6 +909,37 @@ async function deleteCred(id) {
   setSyncing(false);
   if (error) { alert('削除に失敗しました'); return; }
   loadCreds();
+}
+
+// ── Price Manager ──
+const PRICE_PASS = 'kota21004';
+
+function openPriceManager() {
+  document.getElementById('priceInput').value = '';
+  document.getElementById('priceError').style.display = 'none';
+  document.getElementById('priceOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('priceInput').focus(), 100);
+}
+
+function closePriceModalBtn() {
+  document.getElementById('priceOverlay').classList.remove('open');
+}
+
+function closePriceModal(e) {
+  if (e.target === document.getElementById('priceOverlay')) closePriceModalBtn();
+}
+
+function checkPricePass() {
+  const input = document.getElementById('priceInput').value;
+  if (input === PRICE_PASS) {
+    closePriceModalBtn();
+    window.open('https://pattosystem.github.io/price-manager/', '_blank');
+  } else {
+    const err = document.getElementById('priceError');
+    err.style.display = 'block';
+    document.getElementById('priceInput').value = '';
+    setTimeout(() => err.style.display = 'none', 2500);
+  }
 }
 
 // ── Yakuji Clinic Manager ──
